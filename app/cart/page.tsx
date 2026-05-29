@@ -123,7 +123,7 @@ export default function CartPage() {
                         <div className="flex-1">
                             <div className="flex justify-between items-start">
                                 <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{item.product?.name}</h3>
-                                <button onClick={() => removeFromCart(item.productId)} className="text-slate-300 hover:text-red-500">
+                                <button onClick={() => removeFromCart(item.productId)} className="text-primary/40 hover:text-primary transition-colors">
                                     <Trash2 size={18} />
                                 </button>
                             </div>

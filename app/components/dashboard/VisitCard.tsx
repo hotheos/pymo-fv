@@ -55,7 +55,7 @@ export default function VisitCard({
                 {!isCancelled && (
                     <button
                         onClick={() => onCancel(visit.clientNit)}
-                        className="w-10 h-10 lg:w-8 lg:h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 transition-colors">
+                        className="w-10 h-10 lg:w-8 lg:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-colors">
                         <Trash2 size={18} className="lg:hidden" /><Trash2 size={14} className="hidden lg:block" />
                     </button>
                 )}
