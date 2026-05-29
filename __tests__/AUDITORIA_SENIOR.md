@@ -227,13 +227,48 @@ Estos 5 hallazgos deben resolverse antes de considerar el proyecto listo para pr
 
 ---
 
-## Conclusión
+## Conclusión (evaluación inicial)
 
 El proyecto demuestra buena ingeniería en su separación de responsabilidades, documentación exhaustiva, y la reciente adición de pruebas automáticas. Sin embargo, las deficiencias en seguridad (tokens en localStorage) e integración (sin validación de respuestas, sin reintentos) lo descalifican para producción en su estado actual.
 
-**Prioridad de acción sugerida:**
-1. 🔴 Seguridad: Migrar JWT a httpOnly cookies
-2. 🔴 Integración: Zod schemas + timeout + retry en apiFetch
-3. ⚠ Proceso: Pipeline CI en GitHub Actions
-4. ⚠ Calidad: Eliminar `any` de apiMapper.ts
-5. ⚠ Arquitectura: Dividir MockContext en hooks especializados
+---
+
+## Correcciones Aplicadas (commit `27a5b54`)
+
+Las siguientes correcciones pre-producción se aplicaron después de la evaluación inicial:
+
+| # | Hallazgo original | Estado | Resolución |
+|---|-------------------|--------|------------|
+| 1 | 18 `any` en apiMapper.ts | ✅ Resuelto | Interfaces tipadas para cada endpoint del API (`ApiSeller`, `ApiClient`, `ApiProduct`, etc.). **0 `any` en todo el proyecto.** |
+| 2 | cart/page.tsx (475 líneas) | ✅ Resuelto | Refactorizado a 222 líneas. PDF → `pdfGenerator.ts`, pantalla de éxito → `CheckoutSuccess.tsx`. |
+| 3 | MockContext monolítico (28 props) | ✅ Resuelto | Hooks de dominio: `useAuth()`, `useCart()`, `useVisits()`, `useOrders()`, `useClients()` en `hooks.ts`. |
+| 4 | `any` en NewClientSheet | ✅ Resuelto | Tipado con `Client` y `Visit` del proyecto. |
+| 5 | `catch {}` vacíos | ✅ Resuelto | `console.warn` con mensaje descriptivo en `loadProductsFromAPI`. |
+| 6 | `.env.example` faltante | ✅ Ya existía | Verificado: archivo completo con documentación de arquitectura. |
+
+### Notas post-corrección
+
+**Conteo final de `any`:** 0 en todo `app/`
+
+**Tamaños de archivo actualizados:**
+
+| Archivo | Antes | Después | Cumple < 250 |
+|---------|-------|---------|--------------|
+| NewClientSheet.tsx | 657 | 657 | ❌ (wizard autocontenido, decisión consciente) |
+| MockContext.tsx | 470 | 471 | ❌ (orquestador, pero accesible via hooks de dominio) |
+| apiMapper.ts | 210 | 349 | ❌ (creció por interfaces, pero es puro tipos, no lógica) |
+| cart/page.tsx | 475 | **222** | ✅ |
+| page.tsx | 256 | 256 | ⚠ Borderline |
+
+### Pendientes para producción (requieren backend)
+
+Estos items no se corrigen ahora porque dependen de tener el backend Pymo conectado:
+
+| Item | Razón de espera |
+|------|----------------|
+| JWT → httpOnly cookies | Requiere que el backend envíe `Set-Cookie` en `/auth/login` |
+| Zod schemas | Se validarán contra las respuestas reales del API |
+| Timeout + reintentos | Sin backend no hay qué reintentar |
+| Pipeline CI | Se configura al crear el repositorio remoto |
+| Pruebas E2E | Necesitan la app corriendo con datos reales |
+
