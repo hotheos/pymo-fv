@@ -129,22 +129,36 @@ export function generateOrderPDF({ order, client, sellerName, items }: OrderWith
  */
 export function shareOrderWhatsApp({ order, client, sellerName, items }: OrderWithProducts): void {
     const itemLines = items.map((item, i) =>
-        `${i + 1}. ${item.product?.name || "Producto"} x${item.quantity} — ${formatCurrency(item.price * item.quantity)}`
+        `  ${i + 1}. ${item.product?.name || "Producto"}\n      ↳ x${item.quantity}  ·  ${formatCurrency(item.price * item.quantity)}`
     ).join("\n");
 
     const message = [
-        `📋 *Pedido — ${client.name}*`,
+        `╔══════════════════════╗`,
+        `   📋  *PEDIDO DE VENTA*`,
+        `╚══════════════════════╝`,
+        ``,
         `📅 ${formatDate(order.date)}`,
         `🧾 ID: ${order.id}`,
-        `👤 Vendedor: ${sellerName}`,
         ``,
-        `📍 ${client.address}`,
-        `📞 ${client.phone}`,
+        `┌─ *Vendedor*`,
+        `│  👤 ${sellerName}`,
+        `│`,
+        `├─ *Cliente*`,
+        `│  🏪 ${client.name}`,
+        `│  🆔 NIT: ${client.nit}`,
+        `│  📍 ${client.address}`,
+        `│  📞 ${client.phone}`,
+        `└──────────────`,
         ``,
-        `*Productos:*`,
+        `📦 *Productos:*`,
         itemLines,
         ``,
-        `💰 *Total: ${formatCurrency(order.total)}*`,
+        `━━━━━━━━━━━━━━━━━━━━━━`,
+        `💰 *TOTAL:  ${formatCurrency(order.total)}*`,
+        `━━━━━━━━━━━━━━━━━━━━━━`,
+        ``,
+        `_Generado por *Pymo* · Fuerza de Ventas_`,
+        `🔗 pymo-fv.vercel.app`,
     ].join("\n");
 
     const encoded = encodeURIComponent(message);

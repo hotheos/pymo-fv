@@ -38,24 +38,45 @@ export default function CheckoutSuccess({ finalOrder, seller }: CheckoutSuccessP
     };
 
     const handleShareWhatsApp = () => {
-        const itemLines = finalOrder.items.map(item =>
-            `• ${item.product?.name || "Producto"} x${item.quantity} — $${(item.price * item.quantity).toLocaleString()}`
+        const fmt = (n: number) => new Intl.NumberFormat('es-CO', {
+            style: 'currency', currency: 'COP',
+            minimumFractionDigits: 0, maximumFractionDigits: 0,
+        }).format(n);
+
+        const dateStr = new Date().toLocaleDateString("es-CO", {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+        });
+
+        const itemLines = finalOrder.items.map((item, i) =>
+            `  ${i + 1}. ${item.product?.name || "Producto"}\n      ↳ x${item.quantity}  ·  ${fmt(item.price * item.quantity)}`
         ).join("\n");
 
         const message = [
-            `📋 *PEDIDO DE VENTA — PYMO*`,
+            `╔══════════════════════╗`,
+            `   📋  *PEDIDO DE VENTA*`,
+            `╚══════════════════════╝`,
             ``,
-            `👤 *Vendedor:* ${seller?.name || "N/A"}`,
-            `🏪 *Cliente:* ${finalOrder.clientName}`,
-            `🆔 *NIT:* ${finalOrder.clientNit}`,
-            `📍 *Dirección:* ${finalOrder.clientAddress}`,
+            `📅 ${dateStr}`,
+            ``,
+            `┌─ *Vendedor*`,
+            `│  👤 ${seller?.name || "N/A"}`,
+            `│`,
+            `├─ *Cliente*`,
+            `│  🏪 ${finalOrder.clientName}`,
+            `│  🆔 NIT: ${finalOrder.clientNit}`,
+            `│  📍 ${finalOrder.clientAddress}`,
+            `└──────────────`,
             ``,
             `📦 *Productos:*`,
             itemLines,
             ``,
-            `💰 *TOTAL: $${finalOrder.total.toLocaleString()}*`,
+            `━━━━━━━━━━━━━━━━━━━━━━`,
+            `💰 *TOTAL:  ${fmt(finalOrder.total)}*`,
+            `━━━━━━━━━━━━━━━━━━━━━━`,
             ``,
-            `✅ _Generado por Pymo - Fuerza de Ventas_`
+            `_Generado por *Pymo* · Fuerza de Ventas_`,
+            `🔗 pymo-fv.vercel.app`,
         ].join("\n");
 
         const encodedMessage = encodeURIComponent(message);
