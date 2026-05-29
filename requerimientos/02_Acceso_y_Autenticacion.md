@@ -14,9 +14,10 @@ Pymo es un **ecosistema corporativo cerrado**. No es una aplicación de acceso p
 
 ### Endpoint de Producción
 
+> Autenticación basada en **token (JWT)**, sin API key en el cliente. Ver [docs/ARQUITECTURA_SEGURIDAD.md](../docs/ARQUITECTURA_SEGURIDAD.md).
+
 ```
 POST /auth/login
-X-API-Key: <api_key_del_tenant>
 Content-Type: application/json
 
 {
@@ -24,6 +25,8 @@ Content-Type: application/json
   "password": "<contraseña>"
 }
 ```
+
+> `/auth/login` es la única puerta pública. El puente Pymo la protege con rate limiting y bloqueo temporal tras varios fallos.
 
 **Response (200 OK):**
 ```json

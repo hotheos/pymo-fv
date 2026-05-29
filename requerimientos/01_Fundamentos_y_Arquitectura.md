@@ -42,8 +42,8 @@ Pymo (servidor) ───┼─── distri.pymo.com  ──→ ERP Mekano (Dis
 | **Routing** | Subdomain-based via Next.js `middleware.ts` |
 | **Resolución** | `TenantContext.tsx` resuelve el slug del subdomain |
 | **Desarrollo** | Query param `?tenant=xxx` para simular subdominios en localhost |
-| **API Key** | Una **sola master key** compartida por todos los tenants (`NEXT_PUBLIC_API_KEY`) |
-| **API Base URL** | Cada tenant tiene su propia URL al ERP Mekano local |
+| **Autenticación** | Token (JWT) emitido por el puente Pymo en login. Sin API key en el cliente (ver [docs/ARQUITECTURA_SEGURIDAD.md](../docs/ARQUITECTURA_SEGURIDAD.md)) |
+| **API Base URL** | Cada tenant tiene su propia URL al puente Pymo (que fronta al ERP Mekano local) |
 
 ### Middleware (Edge)
 
@@ -82,7 +82,7 @@ Al resolverse el tenant, el contexto:
 - **API Backend:** RESTful, documentada en `docs/API_BACKEND.md` (~1700 líneas)
   - **Base URL:** Configurable por tenant (ver sección 1.3)
   - **Formato:** JSON (request y response)
-  - **Autenticación:** API Key (`X-API-Key`) + Bearer Token (`Authorization`)
+  - **Autenticación:** Bearer Token (`Authorization: Bearer <JWT>`) emitido por el puente Pymo. Sin API key en el cliente.
   - **Idioma API:** Nombres en español con snake_case (`cliente_nit`, `precio_unitario`)
   - **Idioma Frontend:** Nombres en inglés con camelCase (`clientNit`, `unitPrice`)
 
@@ -98,11 +98,10 @@ Módulo singleton que centraliza toda la configuración y comunicación con el b
 |---|---|
 | `setTenantApiConfig(url)` | Configura la URL base del tenant actual |
 | `getBaseUrl()` | Retorna la URL efectiva (tenant → env → default) |
-| `getApiKey()` | Retorna la master API key |
 | `setAuthToken(token)` | Almacena el JWT post-login |
 | `getAuthToken()` | Obtiene el JWT actual |
 | `apiUrl(path)` | Construye URL completa del endpoint |
-| `apiHeaders(extra)` | Genera headers estándar (Content-Type, X-API-Key, Authorization) |
+| `apiHeaders(extra)` | Genera headers estándar (Content-Type, Authorization: Bearer) |
 | `apiFetch(path, options)` | Wrapper de `fetch` con configuración automática |
 
 ---

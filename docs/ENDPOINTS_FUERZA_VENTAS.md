@@ -12,7 +12,7 @@ Pymo es una **app móvil para vendedores** que consume endpoints creados por el 
 
 ```mermaid
 flowchart LR
-    A["🖥️ Pymo Frontend<br/>Next.js / React<br/><i>.env.local (Base URL + Key)</i>"] -- "JSON requests →" --> B["⚙️ Endpoints Mekano<br/>(este documento)<br/><i>API Key (X-API-Key header)</i>"]
+    A["🖥️ Pymo Frontend<br/>Next.js / React<br/><i>.env.local (Base URL)</i>"] -- "JSON + Bearer token →" --> B["⚙️ Puente Pymo → Endpoints Mekano<br/>(este documento)<br/><i>valida el JWT</i>"]
     B -- "← JSON responses" --> A
     B -- "SQL →" --> C["🗄️ Base de Datos<br/>Mekano"]
     C -- "← Resultados" --> B
@@ -35,29 +35,27 @@ Pymo se instala para **múltiples clientes/tenants**, cada uno con su propia bas
 ```bash
 # .env.local (un archivo por cada instalación)
 NEXT_PUBLIC_API_BASE_URL=https://fruggy.pymo.io/api
-NEXT_PUBLIC_API_KEY=pk_abc123_key_del_tenant
 ```
 
 | Variable | Descripción | Ejemplo |
 |---|---|---|
-| `NEXT_PUBLIC_API_BASE_URL` | URL base del backend del tenant | `https://fruggy.pymo.io/api`, `https://tienda.pymo.io/api` |
-| `NEXT_PUBLIC_API_KEY` | API Key proporcionada por el equipo backend | `pk_abc123...` |
+| `NEXT_PUBLIC_API_BASE_URL` | URL base del puente Pymo del tenant. **No es un secreto.** | `https://fruggy.pymo.io/api`, `https://tienda.pymo.io/api` |
 
 > ⚠️ **Importante:**
-> Estos valores **nunca** se hardcodean en el código. Para cambiar de tenant, solo se edita `.env.local` y se reinicia el servidor. El archivo `.env.example` sirve como plantilla.
+> No se envía ninguna API key estática desde el cliente. La autenticación es por **token (JWT)** emitido por el puente en `POST /auth/login` (ver [ARQUITECTURA_SEGURIDAD.md](./ARQUITECTURA_SEGURIDAD.md)). Para cambiar de tenant, solo se edita `.env.local` y se reinicia el servidor.
 
 **Cómo el frontend consume las APIs:**
 
 Todas las llamadas pasan por `apiFetch()` en `app/config/api.ts`, que automáticamente:
 - Prepende el `NEXT_PUBLIC_API_BASE_URL` a la ruta
-- Agrega el header `X-API-Key` con el valor de `NEXT_PUBLIC_API_KEY`
+- Agrega `Authorization: Bearer <token>` cuando hay sesión iniciada
 - Agrega `Content-Type: application/json`
 
 ```ts
 // Ejemplo de consumo:
 const res = await apiFetch("/productos"); 
 // → GET https://fruggy.pymo.io/api/productos
-// → Headers: { "X-API-Key": "pk_abc123...", "Content-Type": "application/json" }
+// → Headers: { "Authorization": "Bearer eyJ...", "Content-Type": "application/json" }
 ```
 
 ---
@@ -68,7 +66,7 @@ const res = await apiFetch("/productos");
 |---|---|
 | **Formato** | JSON (request y response) |
 | **Content-Type** | `application/json` en todos los requests con body |
-| **Autenticación** | API Key en header `X-API-Key` + Bearer Token en header `Authorization` (post-login) |
+| **Autenticación** | Bearer Token en header `Authorization` (JWT emitido por el puente en login). Sin API key en el cliente. |
 | **Errores** | `{ "error": "mensaje", "code": "ERROR_CODE" }` |
 | **Fechas** | ISO 8601 (`2026-02-09T21:00:00-05:00`) |
 | **Moneda** | Valores numéricos en COP (sin decimales, tipo `int`) |
@@ -80,13 +78,12 @@ const res = await apiFetch("/productos");
 Todos los requests incluyen estos headers automáticamente:
 
 ```
-X-API-Key: <api_key_del_tenant>
 Content-Type: application/json
 Authorization: Bearer <token>    ← Solo después del login
 ```
 
 > ℹ️ **Nota:**
-> `X-API-Key` identifica al **tenant/instalación**. `Authorization: Bearer` identifica al **vendedor**. El login es el único endpoint que no requiere Bearer token.
+> `Authorization: Bearer` identifica al **vendedor** (el `id_vendedor` viaja dentro del JWT). El tenant se determina por la URL del puente. El login es el único endpoint que no requiere Bearer token.
 
 ### Códigos de Error Comunes
 
@@ -1322,8 +1319,7 @@ sequenceDiagram
 |---|---|---|
 | **Método** | `GET` | |
 | **URL** | `/pedidos/:nit` | `/pedidos/987987987` |
-| **Header** | `Authorization: Bearer <token>` | El token identifica al vendedor |
-| **Header** | `X-API-Key: <api_key>` | Identifica al tenant |
+| **Header** | `Authorization: Bearer <token>` | El token identifica al vendedor; el tenant lo da la URL del puente |
 | **Body** | *(ninguno)* | Es un GET |
 
 #### Lógica Interna
@@ -1632,7 +1628,7 @@ erDiagram
 ## Referencia Rápida de Endpoints
 
 > ℹ️ **Nota:**
-> Todos los endpoints usan la **URL base del tenant** configurada en `.env.local` (ej: `https://fruggy.pymo.io/api`). Todos incluyen `X-API-Key` en el header. Todos excepto login requieren `Authorization: Bearer <token>`.
+> Todos los endpoints usan la **URL base del tenant** configurada en `.env.local` (ej: `https://fruggy.pymo.io/api`). Todos excepto login requieren `Authorization: Bearer <token>`.
 
 | # | Endpoint | Acción del Backend | Disparado por | Resultado Visual |
 |---|---|---|---|---|

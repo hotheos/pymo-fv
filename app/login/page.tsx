@@ -6,6 +6,7 @@ import { useTenant } from "../context/TenantContext";
 import { useTheme } from "../context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { Badge, Lock, Sun, Moon } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
     const { login } = useMock();
@@ -48,7 +49,7 @@ export default function LoginPage() {
             <div className="w-full max-w-sm">
                 {/* Branding — dynamic per tenant */}
                 <div className="flex flex-col items-center mb-8">
-                    <img src={theme === 'dark' ? "/logo-white.png" : tenant.logo} alt={tenant.name} className="w-[220px] object-contain mb-4" />
+                    <Image src={theme === 'dark' ? "/logo-white.png" : tenant.logo} alt={tenant.name} width={220} height={60} className="object-contain mb-4" priority />
                     <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{tenant.name}</p>
                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium tracking-[0.2em] uppercase">{tenant.tagline}</p>
                 </div>
@@ -114,7 +115,7 @@ export default function LoginPage() {
 
                 {/* Developer Credit */}
                 <div className="mt-12 text-center mb-6">
-                    <img src={theme === 'dark' ? "/apolosoft-white.png" : "/apolosoft.png"} alt="Apolosoft" className="w-[140px] mx-auto opacity-50" />
+                    <Image src={theme === 'dark' ? "/apolosoft-white.png" : "/apolosoft.png"} alt="Apolosoft" width={140} height={40} className="mx-auto opacity-50" />
                 </div>
             </div>
         </div>

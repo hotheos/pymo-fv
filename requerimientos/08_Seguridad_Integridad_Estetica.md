@@ -6,12 +6,16 @@
 
 El sistema es **implacablemente privado**. La seguridad opera en múltiples capas.
 
-### Autenticación Dual
+> Modelo vigente: autenticación basada en **token (JWT)**, sin API key en el cliente. Detalle completo en [docs/ARQUITECTURA_SEGURIDAD.md](../docs/ARQUITECTURA_SEGURIDAD.md).
+
+### Autenticación por Token
 
 | Nivel | Mecanismo | Descripción |
 |---|---|---|
-| **Tenant** | `X-API-Key` header | Master API key que identifica a Pymo como consumidor autorizado |
-| **Vendedor** | `Authorization: Bearer <JWT>` | Token JWT con `id_vendedor` embebido |
+| **Vendedor** | `Authorization: Bearer <JWT>` | Token JWT firmado por el puente Pymo, con `id_vendedor` embebido. Se obtiene en `POST /auth/login`. |
+| **Aislamiento entre empresas** | Secreto de firma por puente | Cada puente (una por empresa) firma con su propio secreto; un token de la empresa A no es válido en la B. |
+
+> No se envía ninguna API key estática desde el cliente. El secreto de firma vive solo en el puente Pymo. El login se protege con rate limiting y bloqueo temporal.
 
 ### Filtro Maestro del Token
 El `id_vendedor` dentro del JWT es el **filtro maestro**. Todas las consultas del backend deben extraer el `id_vendedor` del token. **Nunca confiar en un `id_vendedor` enviado en el body.**

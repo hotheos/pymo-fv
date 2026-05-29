@@ -1,58 +1,71 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
-interface ProductImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+interface ProductImageProps {
     src?: string | null;
+    alt?: string;
+    className?: string;
     fallbackSrc?: string;
+    /** Sizes hint for responsive loading (default: thumbnails) */
+    sizes?: string;
+    /** Priority loading (use for above-the-fold images) */
+    priority?: boolean;
 }
 
+/**
+ * Product image component using next/image for automatic WebP/AVIF
+ * conversion, responsive sizing, and lazy loading.
+ *
+ * Falls back to a placeholder when the source is missing or fails to load.
+ */
 export default function ProductImage({
     src,
     alt,
     className,
     fallbackSrc = "/product-placeholder.png",
-    ...props
+    sizes = "(max-width: 768px) 96px, 128px",
+    priority = false,
 }: ProductImageProps) {
     const [imageError, setImageError] = useState(false);
 
-    // Reset error state only if the src prop actually changes to a new URL
+    // Reset error state when src changes
     useEffect(() => {
         if (src) {
             setImageError(false);
         }
     }, [src]);
 
-    // If no src is provided, we treat it as an error state immediately to show fallback
     const isNoSource = !src || src === "";
+    const showFallback = isNoSource || imageError;
+
+    // Detect if source is external (starts with http) or local
+    const isExternal = src?.startsWith("http");
 
     return (
         <div className={`relative overflow-hidden ${className}`}>
-            {/* LAYER 1: The Safety Net (Placeholder) */}
-            {/* Always rendered. We remove -z-10 to prevent it from hiding behind parent backgrounds. */}
-            <img
+            {/* LAYER 1: Placeholder (always rendered as safety net) */}
+            <Image
                 src={fallbackSrc}
                 alt="placeholder"
-                className="absolute inset-0 w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes={sizes}
             />
 
-            {/* LAYER 2: The Hero (Product Image) */}
-            {/* Renders on top with relative positioning to ensure it covers the absolute placeholder. */}
-            {!isNoSource && (
-                <img
+            {/* LAYER 2: Product image (covers placeholder when loaded) */}
+            {!showFallback && (
+                <Image
                     src={src!}
                     alt={alt || "Imagen del producto"}
-                    className={`relative z-10 w-full h-full object-cover transition-opacity duration-300 ${imageError ? "opacity-0" : "opacity-100"
-                        }`}
-                    onError={(e) => {
-                        // Crucial: Simply mark as error to trigger fade-out.
-                        // No logic to swap src, no infinite loops.
-                        // Just "If you fail, step aside".
-                        setImageError(true);
-                        if (props.onError) props.onError(e);
-                    }}
-                    loading="lazy"
-                    {...props}
+                    fill
+                    className={`object-cover transition-opacity duration-300 ${imageError ? "opacity-0" : "opacity-100"}`}
+                    sizes={sizes}
+                    loading={priority ? undefined : "lazy"}
+                    priority={priority}
+                    onError={() => setImageError(true)}
+                    {...(isExternal ? { unoptimized: false } : {})}
                 />
             )}
         </div>
