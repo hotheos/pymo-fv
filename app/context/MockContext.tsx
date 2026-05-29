@@ -133,8 +133,9 @@ export function MockProvider({ children }: { children: React.ReactNode }) {
 
                 setProducts(mapped);
 
-            } catch {
+            } catch (err) {
                 // Sin conexión al backend: se mantienen los datos mock (estado inicial).
+                console.warn("[MockContext] Backend no disponible, usando datos mock:", err instanceof Error ? err.message : err);
             }
         };
 

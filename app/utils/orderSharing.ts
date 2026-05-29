@@ -101,8 +101,8 @@ export function generateOrderPDF({ order, client, sellerName, items }: OrderWith
     });
 
     // --- Total ---
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const finalY = (doc as any).lastAutoTable?.finalY || 140;
+    // @ts-expect-error jspdf-autotable adds lastAutoTable to the doc instance but does not export types for it
+    const finalY: number = doc.lastAutoTable?.finalY || 140;
 
     doc.setFillColor(73, 177, 245);
     doc.roundedRect(120, finalY + 8, 75, 16, 3, 3, "F");

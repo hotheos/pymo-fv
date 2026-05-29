@@ -85,8 +85,8 @@ export default function NewClientSheet({ isOpen, onClose }: NewClientSheetProps)
     // Unified search result from API (GET /clientes/buscar/:nit)
     const [searchResult, setSearchResult] = useState<{
         foundIn: "asignado" | "no_asignado" | null;
-        client?: any;
-        visit?: any;
+        client?: Client;
+        visit?: Visit | null;
     } | null>(null);
 
     // Derive existingClient and existingVisit from search result
