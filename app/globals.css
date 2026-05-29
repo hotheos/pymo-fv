@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+
+  /* Tenant theming — defaults overridden by TenantContext at runtime */
+  --tenant-primary: #4B91E2;
+  --tenant-gradient-from: #49B1F5;
+  --tenant-gradient-to: #7477D8;
+}
+
+.dark {
+  --foreground-rgb: 226, 232, 240;
+}
+
+/* Tenant gradient utility — use instead of hardcoded from-[#49B1F5] to-[#7477D8] */
+.bg-tenant-gradient {
+  background: linear-gradient(135deg, var(--tenant-gradient-from), var(--tenant-gradient-to));
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  min-height: 100vh;
+}
+
+/* Collapse PullToRefresh internal spacing */
+.ptr {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ptr__pull-down {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.ptr__children {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Invisible scrollbar */
+* {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Edge */
+}
+
+/* Smooth mobile scroll */
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide focus outline on scroll container */
+#scrollable-container:focus {
+  outline: none;
+}
