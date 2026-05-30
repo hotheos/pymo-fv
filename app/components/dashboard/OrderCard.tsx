@@ -84,7 +84,7 @@ export default function OrderCard({ order, client, onWallet, onViewSummary, onNe
                     </div>
                 </div>
 
-                <div className="flex-1 text-right overflow-hidden relative h-10 lg:h-8 flex items-center justify-end">
+                <div className="flex-1 text-right relative h-10 lg:h-8 flex items-center justify-end">
                     <div className="relative w-full h-full flex items-center justify-end">
                         {/* Total Price display - Stacked vertically for large values */}
                         <div className={`absolute right-0 top-0 bottom-0 flex flex-col justify-center items-end transition-all duration-300 transform ${
