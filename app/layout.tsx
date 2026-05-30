@@ -4,6 +4,7 @@ import "./globals.css";
 import { MockProvider } from "@/context/MockContext";
 import { TenantProvider } from "@/context/TenantContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import GlobalScrollHandler from "./components/GlobalScrollHandler";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,6 +51,7 @@ export default function RootLayout({
                 <ThemeProvider>
                     <TenantProvider>
                         <MockProvider>
+                            <GlobalScrollHandler />
                             <div className="max-w-md lg:max-w-7xl mx-auto min-h-screen bg-white dark:bg-dark-900 shadow-2xl lg:shadow-none relative transition-colors">
                                 {children}
                             </div>
