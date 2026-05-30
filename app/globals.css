@@ -5,10 +5,17 @@
 :root {
   --foreground-rgb: 0, 0, 0;
 
-  /* Tenant theming — defaults overridden by TenantContext at runtime */
+  /* Tenant theming: defaults overridden by TenantContext at runtime */
   --tenant-primary: #4B91E2;
   --tenant-gradient-from: #49B1F5;
   --tenant-gradient-to: #7477D8;
+
+  /* Tinted dark mode backgrounds */
+  --dark-950: hsl(220, 20%, 4%);
+  --dark-900: hsl(220, 20%, 7%);
+  --dark-800: hsl(220, 20%, 12%);
+  --dark-700: hsl(220, 20%, 18%);
+  --dark-600: hsl(220, 20%, 25%);
 }
 
 .dark {

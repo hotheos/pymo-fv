@@ -2,14 +2,20 @@
 
 import { useMock } from "../context/MockContext";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Trash2, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Trash2, AlertCircle, Save, LayoutGrid, ShoppingCart } from "lucide-react";
+import { useState, useEffect } from "react";
 import ProductImage from "../components/ui/ProductImage";
 import CheckoutSuccess from "../components/cart/CheckoutSuccess";
 
 export default function CartPage() {
-    const { cart, products, updateCartQuantity, removeFromCart, addOrder, completeVisit, seller, activeClientNit, visits, clients, saveCart } = useMock();
+    const { cart, products, updateCartQuantity, removeFromCart, addOrder, completeVisit, seller, activeClientNit, visits, clients, saveCart, getCart } = useMock();
     const router = useRouter();
+    const handleBack = () => {
+        if (activeClientNit) {
+            saveCart(activeClientNit);
+        }
+        router.push("/");
+    };
     const [isSuccess, setIsSuccess] = useState(false);
     const [finalOrder, setFinalOrder] = useState<{
         items: typeof cartItems;
@@ -35,6 +41,18 @@ export default function CartPage() {
     }).filter(item => item.product);
 
     const total = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const cartTotalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    const savedCart = activeClientNit ? getCart(activeClientNit) : [];
+    const hasChanges = (() => {
+        if (!activeClientNit) return false;
+        if (cart.length !== savedCart.length) return true;
+        for (const item of cart) {
+            const savedItem = savedCart.find(s => s.productId === item.productId);
+            if (!savedItem || savedItem.quantity !== item.quantity) return true;
+        }
+        return false;
+    })();
 
     // Stock validation: detect items where saved quantity exceeds current stock
     const stockIssues = cartItems.filter(item => item.product && item.quantity > item.product.stock);
@@ -102,11 +120,82 @@ export default function CartPage() {
     return (
         <div className="pb-32 bg-slate-50 dark:bg-dark-900 min-h-screen transition-colors">
             {/* Header */}
-            <header className="bg-white dark:bg-dark-900 shadow-sm px-4 py-4 flex items-center gap-3 sticky top-0 z-10 transition-colors">
-                <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400">
-                    <ArrowLeft size={24} />
-                </button>
-                <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Resumen del Pedido</h1>
+            <header className="bg-white dark:bg-dark-900 shadow-sm px-4 py-4 sticky top-0 z-10 transition-colors">
+                <div className="relative flex items-center justify-between h-10 w-full">
+                    {/* Left Button */}
+                    <button
+                        onClick={handleBack}
+                        style={{
+                            transition: hasChanges
+                                ? "background-color 300ms ease-out, width 500ms cubic-bezier(0.16, 1, 0.3, 1) 150ms, padding 500ms cubic-bezier(0.16, 1, 0.3, 1) 150ms"
+                                : "width 400ms cubic-bezier(0.16, 1, 0.3, 1), padding 400ms cubic-bezier(0.16, 1, 0.3, 1), background-color 300ms ease-out 200ms"
+                        }}
+                        className={`
+                            relative h-10 flex items-center rounded-full overflow-hidden active:scale-95 flex-shrink-0 z-10
+                            ${hasChanges 
+                                ? "bg-amber-400 text-slate-950 pl-2.5 pr-4 gap-2 w-32 shadow-md justify-start -ml-2" 
+                                : "bg-transparent text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-800/60 w-10 justify-center -ml-2"
+                            }
+                        `}
+                        type="button"
+                    >
+                        <ArrowLeft 
+                            size={20} 
+                            className={`transition-colors duration-300 flex-shrink-0 ${hasChanges ? "stroke-[2.5] text-slate-950" : "text-slate-500 dark:text-slate-400"}`} 
+                        />
+
+                        {/* Expanding section with Save icon and text */}
+                        <div 
+                            style={{
+                                transition: hasChanges
+                                    ? "opacity 300ms ease-out 300ms, transform 400ms cubic-bezier(0.16, 1, 0.3, 1) 250ms"
+                                    : "opacity 150ms ease-out, transform 150ms ease-out"
+                            }}
+                            className={`
+                                flex items-center gap-1.5 flex-shrink-0
+                                ${hasChanges 
+                                    ? "opacity-100 translate-x-0" 
+                                    : "opacity-0 translate-x-4 pointer-events-none w-0"
+                                }
+                            `}
+                        >
+                            <Save size={15} className="stroke-[2.5] flex-shrink-0 text-slate-950" />
+                            <span className="font-extrabold text-[11px] tracking-wider flex-shrink-0 text-slate-950">GUARDAR</span>
+                        </div>
+                    </button>
+
+                    {/* Centered Title */}
+                    <h1 className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap z-0">
+                        Resumen del Pedido
+                    </h1>
+
+                    {/* Right Navigation Switch Pill */}
+                    <button
+                        onClick={() => router.push("/catalog")}
+                        className="relative flex items-center bg-slate-100/50 dark:bg-dark-800 p-[2px] rounded-full h-8 w-[72px] z-10 ml-auto select-none border border-slate-300/85 dark:border-dark-600 overflow-hidden active:scale-95 transition-transform duration-200 cursor-pointer"
+                        title="Ir al Catálogo de Productos"
+                        type="button"
+                    >
+                        {/* Sliding highlight indicator */}
+                        <div 
+                            className="absolute top-[2px] bottom-[2px] w-[32px] rounded-full bg-primary shadow-sm transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform translate-x-[34px]"
+                            style={{ left: "2px" }}
+                        />
+
+                        {/* Catalog Icon Container */}
+                        <div className="w-[32px] h-full flex items-center justify-center relative z-10 text-slate-400 dark:text-slate-500 transition-colors duration-300">
+                            <LayoutGrid size={15} className="stroke-[2.2]" />
+                        </div>
+
+                        {/* Spacer between switch elements */}
+                        <div className="w-[4px] h-full" />
+
+                        {/* Cart Icon Container */}
+                        <div className="w-[32px] h-full flex items-center justify-center relative z-10 text-white">
+                            <ShoppingCart size={15} className="stroke-[2.2]" />
+                        </div>
+                    </button>
+                </div>
             </header>
 
             {/* Items List */}

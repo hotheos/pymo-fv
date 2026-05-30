@@ -339,7 +339,7 @@ export function MockProvider({ children }: { children: React.ReactNode }) {
         setActiveClientNit(nit);
         const savedCart = cartsByNit[nit];
         if (savedCart && savedCart.length > 0) {
-            setCart(savedCart);
+            setCart(savedCart.map(item => ({ ...item })));
         } else {
             setCart([]);
         }
@@ -394,7 +394,7 @@ export function MockProvider({ children }: { children: React.ReactNode }) {
                 setActiveClientNit(nit);
                 const savedCart = cartsByNit[nit];
                 if (savedCart && savedCart.length > 0) {
-                    setCart(savedCart);
+                    setCart(savedCart.map(item => ({ ...item })));
                 } else {
                     setCart([]);
                 }

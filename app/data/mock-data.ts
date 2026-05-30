@@ -114,7 +114,7 @@ export const createMockOrders = (): Order[] => [
             { productId: "p2", quantity: 5, price: 2800 },
             { productId: "p4", quantity: 3, price: 12500 },
         ],
-        total: 93500,
+        total: 15320500,
         date: new Date(new Date().setHours(8, 15, 0)).toISOString(),
         status: "COMPLETED",
     },

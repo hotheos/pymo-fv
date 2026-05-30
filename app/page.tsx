@@ -10,12 +10,16 @@ import {
     Wallet,
     Fingerprint,
     Sun,
-    Moon
+    Moon,
+    Palette,
+    TrendingUp
 } from "lucide-react";
 import Image from "next/image";
 import NewClientSheet from "./components/NewClientSheet";
 import WalletModal from "./components/WalletModal";
 import VisitSummarySheet from "./components/VisitSummarySheet";
+import ColorPickerSheet from "./components/ColorPickerSheet";
+import TodaySalesSheet from "./components/TodaySalesSheet";
 import KpiGrid from "./components/dashboard/KpiGrid";
 import VisitColumns from "./components/dashboard/VisitColumns";
 import { formatCurrency } from "./context/business-logic";
@@ -28,6 +32,8 @@ export default function Home() {
     const [isNewClientOpen, setIsNewClientOpen] = useState(false);
     const [walletModal, setWalletModal] = useState<{ isOpen: boolean; clientName: string; clientNit: string }>({ isOpen: false, clientName: "", clientNit: "" });
     const [summaryModal, setSummaryModal] = useState<{ isOpen: boolean; orderId: string }>({ isOpen: false, orderId: "" });
+    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+    const [isTodaySalesOpen, setIsTodaySalesOpen] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Aggressive auto-focus: ensure scroll container is always the active element
@@ -147,6 +153,13 @@ export default function Home() {
                     >
                         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
+                    <button
+                        onClick={() => setIsColorPickerOpen(true)}
+                        className="text-slate-400 hover:text-primary transition-colors"
+                        title="Personalizar Tema"
+                    >
+                        <Palette size={18} />
+                    </button>
                     {/* Desktop: Identificar Cliente button after icons */}
                     <div className="hidden lg:block h-6 w-px bg-slate-200 dark:bg-dark-600"></div>
                     <button
@@ -159,16 +172,21 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    {/* Desktop: Ventas de Hoy inline */}
-                    <div className="hidden lg:flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Wallet size={16} className="text-primary" />
+                    {/* Desktop: Ventas de Hoy inline button */}
+                    <button
+                        onClick={() => setIsTodaySalesOpen(true)}
+                        className="hidden lg:flex items-center gap-3 text-left focus:outline-none group hover:scale-[1.02] active:scale-95 transition-all p-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-800"
+                        title="Ver desglose de ventas de hoy"
+                        type="button"
+                    >
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary/20 group-hover:shadow-sm transition-all flex-shrink-0">
+                            <TrendingUp size={16} className="stroke-[2.5]" />
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ventas de Hoy</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-primary transition-colors">Ventas de Hoy</span>
                             <p className="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">{formatCurrency(todaySales)}</p>
                         </div>
-                    </div>
+                    </button>
                     <div className="hidden lg:block h-6 w-px bg-slate-200 dark:bg-dark-600"></div>
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-300 leading-none">{seller.name}</span>
                 </div>
@@ -187,15 +205,19 @@ export default function Home() {
 
                         {/* Ventas + Identificar: visible only on mobile */}
                         <div className="space-y-4 lg:hidden">
-                            <div className="bg-white dark:bg-dark-800 rounded-2xl p-4 shadow-high flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <Wallet size={22} className="text-primary" />
+                            <button
+                                onClick={() => setIsTodaySalesOpen(true)}
+                                className="w-full bg-white dark:bg-dark-800 rounded-2xl p-4 shadow-high flex items-center gap-4 text-left active:scale-[0.98] transition-transform"
+                                type="button"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                                    <TrendingUp size={22} className="stroke-[2.5]" />
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ventas de Hoy</span>
                                     <p className="text-2xl font-black text-slate-800 dark:text-slate-100 leading-tight">{formatCurrency(todaySales)}</p>
                                 </div>
-                            </div>
+                            </button>
 
                             <button
                                 onClick={() => setIsNewClientOpen(true)}
@@ -250,6 +272,15 @@ export default function Home() {
                 isOpen={summaryModal.isOpen}
                 onClose={() => setSummaryModal({ isOpen: false, orderId: "" })}
                 orderId={summaryModal.orderId}
+            />
+            <ColorPickerSheet
+                isOpen={isColorPickerOpen}
+                onClose={() => setIsColorPickerOpen(false)}
+            />
+            <TodaySalesSheet
+                isOpen={isTodaySalesOpen}
+                onClose={() => setIsTodaySalesOpen(false)}
+                onViewSummary={(orderId) => setSummaryModal({ isOpen: true, orderId })}
             />
         </main >
     );
